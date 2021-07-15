@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  7
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+inlet
+{
+type codedFixedValue;
+redirectType velocity_inlet;
+code
+#{
+scalar Ustar=0.089;
+scalar k=0.41;
+scalar z0=0.01;
+fixedValueFvPatchVectorField myPatch(*this);
+forAll(this->patch().Cf(),i)
+{
+myPatch[i]=vector(Ustar/k*(Foam::log((this->patch().Cf()[i].z())/z0)),0,0);
+}
+operator==(myPatch);
+#};
+value $internalField;
+}
+
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    Wall
+    {
+        type            noSlip;
+    }
+
+    top
+    {
+        type            symmetryPlane;
+    }
+
+    front
+    {
+        type            symmetryPlane;
+    }
+
+    back
+    {
+        type            symmetryPlane;
+    }
+}
+
+// ************************************************************************* //
